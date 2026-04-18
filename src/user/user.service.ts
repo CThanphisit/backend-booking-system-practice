@@ -8,10 +8,10 @@ export class UserService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   async register(resgisterDto: RegisterDto) {
-    console.log('resgisterDto', resgisterDto)
+    console.log('resgisterDto', resgisterDto);
     const { email, password, name, phoneNumber } = resgisterDto;
 
     // 1. check email ซ้ำ

@@ -6,11 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from 'src/user/user.service';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +21,24 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  login(@Body() body: { email: string; password: string }) {
-    return this.userService.login(body.email, body.password);
+  // login(@Body() body: { email: string; password: string }) {
+  //   return this.userService.login(body.email, body.password);
+  // }
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.userService.login(body.email, body.password);
+
+    res.cookie('access_token', result.access_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    return {
+      message: 'Login success',
+    };
   }
 
   @Get()
