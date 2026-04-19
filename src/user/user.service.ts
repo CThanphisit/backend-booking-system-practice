@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -57,37 +57,37 @@ export class UserService {
     };
   }
 
-  async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+  // async login(email: string, password: string) {
+  //   const user = await this.prisma.user.findUnique({
+  //     where: { email },
+  //   });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  //   if (!user) {
+  //     throw new UnauthorizedException('Invalid credentials');
+  //   }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+  //   const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  //   if (!isPasswordValid) {
+  //     throw new UnauthorizedException('Invalid credentials');
+  //   }
 
-    const token = this.jwtService.sign({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
+  //   const token = this.jwtService.sign({
+  //     sub: user.id,
+  //     email: user.email,
+  //     role: user.role,
+  //   });
 
-    return {
-      access_token: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-    };
-  }
+  //   return {
+  //     access_token: token,
+  //     user: {
+  //       id: user.id,
+  //       email: user.email,
+  //       name: user.name,
+  //       role: user.role,
+  //     },
+  //   };
+  // }
 
   create() {
     return 'This action adds a new user';

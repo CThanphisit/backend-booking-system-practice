@@ -7,11 +7,15 @@ import {
   Param,
   Delete,
   Res,
+  UseGuards,
+  Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { UserService } from 'src/user/user.service';
 import type { Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+import { UserService } from 'src/user/user.service';
+import { RegisterDto } from 'src/user/dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,18 +24,26 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
+  @Post('register')
+  async register(@Body() registerDto: RegisterDto) {
+    return this.userService.register(registerDto);
+  }
+
   @Post('login')
-  // login(@Body() body: { email: string; password: string }) {
-  //   return this.userService.login(body.email, body.password);
-  // }
   async login(
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.userService.login(body.email, body.password);
+    const result = await this.authService.login(body.email, body.password);
 
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
+    res.cookie('role', result.user.role, {
+      httpOnly: false, // 🔥 ต้องอ่านได้ใน middleware
       secure: false,
       sameSite: 'lax',
     });
@@ -41,23 +53,26 @@ export class AuthController {
     };
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: false, // dev
+      sameSite: 'lax',
+    });
+
+    res.clearCookie('role', {
+      httpOnly: false,
+      secure: false, // dev
+      sameSite: 'lax',
+    });
+
+    return { message: 'Logout success' };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  getMe(@Req() req) {
+    return req.user;
   }
 }
