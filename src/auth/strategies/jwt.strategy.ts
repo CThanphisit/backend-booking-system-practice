@@ -8,7 +8,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req) => {
-          console.log('cookies:', req.cookies); // 🔥 debug
           return req?.cookies?.access_token;
         },
       ]),
@@ -21,6 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: payload.sub,
       email: payload.email,
       role: payload.role,
+      name: payload.name,
     };
   }
 }

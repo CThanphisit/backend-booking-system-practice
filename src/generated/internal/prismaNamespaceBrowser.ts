@@ -52,7 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Resource: 'Resource',
+  Room: 'Room',
   Booking: 'Booking'
 } as const
 
@@ -74,32 +74,49 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
-  name: 'name',
   email: 'email',
+  name: 'name',
   password: 'password',
   phoneNumber: 'phoneNumber',
   role: 'role',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const ResourceScalarFieldEnum = {
+export const RoomScalarFieldEnum = {
   id: 'id',
-  name: 'name'
+  roomNumber: 'roomNumber',
+  type: 'type',
+  floor: 'floor',
+  maxOccupancy: 'maxOccupancy',
+  pricePerNight: 'pricePerNight',
+  description: 'description',
+  images: 'images',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
-export type ResourceScalarFieldEnum = (typeof ResourceScalarFieldEnum)[keyof typeof ResourceScalarFieldEnum]
+export type RoomScalarFieldEnum = (typeof RoomScalarFieldEnum)[keyof typeof RoomScalarFieldEnum]
 
 
 export const BookingScalarFieldEnum = {
   id: 'id',
+  code: 'code',
   userId: 'userId',
-  resourceId: 'resourceId',
-  startTime: 'startTime',
-  endTime: 'endTime',
-  status: 'status'
+  roomId: 'roomId',
+  checkInDate: 'checkInDate',
+  checkOutDate: 'checkOutDate',
+  nights: 'nights',
+  guestCount: 'guestCount',
+  totalAmount: 'totalAmount',
+  status: 'status',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
@@ -119,4 +136,12 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

@@ -16,6 +16,8 @@ import type { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
 import { RegisterDto } from 'src/user/dto/register.dto';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
+import type { User } from 'src/generated/client';
 
 @Controller('auth')
 export class AuthController {
@@ -34,6 +36,7 @@ export class AuthController {
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log('bodyLogin', body);
     const result = await this.authService.login(body.email, body.password);
 
     res.cookie('access_token', result.access_token, {
@@ -72,7 +75,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
-  getMe(@Req() req) {
-    return req.user;
+  getMe(@GetUser() user: User) {
+    return user;
   }
 }

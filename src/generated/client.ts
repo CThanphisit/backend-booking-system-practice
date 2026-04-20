@@ -45,10 +45,10 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
- * Model Resource
+ * Model Room
  * 
  */
-export type Resource = Prisma.ResourceModel
+export type Room = Prisma.RoomModel
 /**
  * Model Booking
  * 
