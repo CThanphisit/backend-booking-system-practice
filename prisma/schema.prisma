@@ -32,6 +32,12 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum PaymentStatus {
+  WAITING_REVIEW  // user upload slip แล้ว รอ admin ตรวจ
+  APPROVED        // admin อนุมัติแล้ว
+  REJECTED        // admin ปฏิเสธ (สลิปผิด/ยอดไม่ตรง)
+}
+
 model User {
   id          String   @id @default(uuid())
   email       String   @unique
@@ -80,10 +86,29 @@ model Booking {
   note         String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  payment      Payment?
+  paymentDeadline DateTime?
 
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
 
   @@index([roomId, checkInDate, checkOutDate]) // สำหรับเช็คห้องว่าง
   @@map("bookings")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  bookingId   String        @unique   // 1 booking = 1 payment
+  amount      Decimal       @db.Decimal(10, 2)
+  slipUrl     String        // URL รูปสลิปที่ user upload
+  status      PaymentStatus @default(WAITING_REVIEW)
+  note        String?       // admin ใส่หมายเหตุตอน reject
+  reviewedBy  String?       // adminId ที่ตรวจ
+  reviewedAt  DateTime?     // เวลาที่ตรวจ
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }

@@ -32,3 +32,8 @@ export type Room = Prisma.RoomModel
  * 
  */
 export type Booking = Prisma.BookingModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel

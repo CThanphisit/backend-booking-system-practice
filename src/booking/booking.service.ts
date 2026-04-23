@@ -133,7 +133,17 @@ export class BookingService {
       where: whereCondition,
       include: {
         room: true,
-        user: true,
+        payment: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            first_name: true,
+            last_name: true,
+            phoneNumber: true,
+            role: true,
+          },
+        },
       },
       //   orderBy: {
       //     createdAt: 'desc',
@@ -142,6 +152,7 @@ export class BookingService {
   }
 
   async findOne(id: string, userId: string) {
+    console.log('userIdGetBookingByID', userId);
     const checkOwner = await this.prisma.booking.findFirst({
       where: {
         id: id,
