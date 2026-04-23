@@ -26,7 +26,9 @@ export class RoomService {
   }
 
   async findAll() {
-    const allRooms = await this.prisma.room.findMany();
+    const allRooms = await this.prisma.room.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
 
     return allRooms;
   }

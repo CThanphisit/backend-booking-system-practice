@@ -12,7 +12,8 @@ export class UserService {
 
   async register(resgisterDto: RegisterDto) {
     console.log('resgisterDto', resgisterDto);
-    const { email, password, name, phoneNumber } = resgisterDto;
+    const { email, password, first_name, last_name, phoneNumber } =
+      resgisterDto;
 
     // 1. check email ซ้ำ
     const existingUser = await this.prisma.user.findUnique({
@@ -31,7 +32,8 @@ export class UserService {
       data: {
         email,
         password: hashedPassword,
-        name,
+        first_name,
+        last_name,
         phoneNumber,
       },
     });
@@ -50,7 +52,8 @@ export class UserService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
         phoneNumber: user.phoneNumber,
         role: user.role,
       },

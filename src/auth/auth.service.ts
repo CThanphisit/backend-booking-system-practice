@@ -29,7 +29,9 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
-      name: user.name,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phoneNumber: user.phoneNumber,
     });
 
     return {
@@ -37,8 +39,10 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
         role: user.role,
+        phoneNumber: user.phoneNumber,
       },
     };
   }

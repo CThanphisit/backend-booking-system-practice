@@ -18,7 +18,11 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  first_name!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  last_name!: string;
 
   @IsPhoneNumber('TH')
   @IsNotEmpty()

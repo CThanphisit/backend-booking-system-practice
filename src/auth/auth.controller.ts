@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Res,
-  UseGuards,
-  Req,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -46,7 +34,7 @@ export class AuthController {
     });
 
     res.cookie('role', result.user.role, {
-      httpOnly: false, // 🔥 ต้องอ่านได้ใน middleware
+      httpOnly: false, // ต้องอ่านได้ใน middleware
       secure: false,
       sameSite: 'lax',
     });
