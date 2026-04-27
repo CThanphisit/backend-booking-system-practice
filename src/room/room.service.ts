@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { format } from 'date-fns';
 
 @Injectable()
 export class RoomService {
@@ -31,6 +32,29 @@ export class RoomService {
     });
 
     return allRooms;
+  }
+
+  async getBookedDates(roomId: string): Promise<string[]> {
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        roomId,
+        status: { in: ['PENDING', 'CONFIRMED', 'CHECKED_IN'] },
+      },
+      select: { checkInDate: true, checkOutDate: true },
+    });
+
+    // แตก range ออกเป็นทุกวัน
+    const dates = new Set<string>();
+    for (const booking of bookings) {
+      const current = new Date(booking.checkInDate);
+      const end = new Date(booking.checkOutDate);
+      while (current < end) {
+        dates.add(format(current, 'yyyy-MM-dd'));
+        current.setDate(current.getDate() + 1);
+      }
+    }
+
+    return [...dates];
   }
 
   findOne(id: string) {

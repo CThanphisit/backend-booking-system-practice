@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BookingModule } from './booking/booking.module';
 import { RoomModule } from './room/room.module';
 import { PaymentModule } from './payment/payment.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PaymentModule } from './payment/payment.module';
     BookingModule,
     RoomModule,
     PaymentModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -77,8 +77,8 @@ model Booking {
   code         String        @unique // BK-xxxx
   userId       String
   roomId       String
-  checkInDate  DateTime      @db.Date
-  checkOutDate DateTime      @db.Date
+  checkInDate  DateTime      
+  checkOutDate DateTime      
   nights       Int
   guestCount   Int
   totalAmount  Decimal       @db.Decimal(10, 2)

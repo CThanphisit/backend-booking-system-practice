@@ -145,9 +145,9 @@ export class BookingService {
           },
         },
       },
-      //   orderBy: {
-      //     createdAt: 'desc',
-      //   },
+      orderBy: {
+        updatedAt: 'desc',
+      },
     });
   }
 
@@ -160,6 +160,7 @@ export class BookingService {
       },
       include: {
         room: true,
+        payment: true,
       },
     });
 

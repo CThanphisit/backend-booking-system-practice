@@ -6,12 +6,36 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Role } from 'src/generated/enums';
 import { Auth } from 'src/common/decorators/auth.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '@/auth/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const cloudinaryStorage = new CloudinaryStorage({
+  cloudinary, // ตอนนี้ config run แล้วแน่นอน
+  params: {
+    folder: 'bookify/rooms',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  } as any,
+});
 
 @Controller('room')
 export class RoomController {
@@ -23,6 +47,24 @@ export class RoomController {
     return this.roomService.create(createRoomDto);
   }
 
+  @Post('upload-image')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: cloudinaryStorage, // ✅ เปลี่ยนจาก diskStorage
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return cb(new BadRequestException('รับเฉพาะรูปภาพ'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return { url: file.path }; // ✅ เปลี่ยนจาก file.filename → file.path
+  }
   @Get()
   findAll() {
     return this.roomService.findAll();
@@ -37,6 +79,11 @@ export class RoomController {
   @Auth(Role.ADMIN)
   update(@Param('id') id: string, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.update(id, updateRoomDto);
+  }
+
+  @Get(':id/booked-dates')
+  getBookedDates(@Param('id') id: string) {
+    return this.roomService.getBookedDates(id);
   }
 
   @Delete(':id')

@@ -226,4 +226,15 @@ export class PaymentService {
     if (!payment) throw new NotFoundException('ไม่พบรายการชำระเงิน');
     return payment;
   }
+
+  // ให้ User ส่งใบเสร็จใหม่ กรณี Admin REJECT
+  // async reSubmitPayment(paymentId: string, newSlipUrl: string, user: User) {
+  //   const uploadedSlip = await this.uploadSlip(paymentId, newSlipUrl, user);
+
+  //   if (!uploadedSlip) {
+  //     throw new BadRequestException('ไม่สามารถอัพโหลดใบเสร็จใหม่ได้');
+  //   }
+
+  //   return
+  // }
 }

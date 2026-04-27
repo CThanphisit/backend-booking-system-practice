@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { Role } from '@/generated/enums';
 import type { User } from '@/generated/client';
@@ -21,16 +20,16 @@ import { GetUser } from '@/common/decorators/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@/auth/guards/roles.guard';
 import { ReviewPaymentDto } from './dto/review-payment.dto';
-import { extname } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-// ─── Multer config ────────────────────────────────────────────────────────────
-const slipStorage = diskStorage({
-  destination: './uploads/slips',
-  filename: (req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = extname(file.originalname);
-    cb(null, `slip-${unique}${ext}`);
-  },
+const slipStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'bookify/slips',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+  } as any,
 });
 
 const imageFileFilter = (
@@ -50,7 +49,7 @@ export class PaymentController {
 
   @Post('upload-slip')
   @UseGuards(AuthGuard('jwt'))
-  // ── User: upload slip ──────────────────────────────────────────────────────
+  // ── User: upload slip
   @Post('upload-slip')
   @UseInterceptors(
     FileInterceptor('slip', {
@@ -65,8 +64,7 @@ export class PaymentController {
     @GetUser() user: User,
   ) {
     if (!file) throw new BadRequestException('กรุณาแนบรูปสลิป');
-    const slipUrl = `/uploads/slips/${file.filename}`;
-    return this.paymentService.uploadSlip(bookingId, slipUrl, user);
+    return this.paymentService.uploadSlip(bookingId, file.path, user);
   }
 
   // ── User: ดูสถานะ payment ของ booking ────────────────────────────────────
