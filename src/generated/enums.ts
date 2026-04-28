@@ -39,7 +39,9 @@ export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
 export const PaymentStatus = {
   WAITING_REVIEW: 'WAITING_REVIEW',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  REFUND_PENDING: 'REFUND_PENDING',
+  REFUNDED: 'REFUNDED'
 } as const
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]

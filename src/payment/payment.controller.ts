@@ -18,7 +18,6 @@ import { Role } from '@/generated/enums';
 import type { User } from '@/generated/client';
 import { GetUser } from '@/common/decorators/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '@/auth/guards/roles.guard';
 import { ReviewPaymentDto } from './dto/review-payment.dto';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -67,34 +66,34 @@ export class PaymentController {
     return this.paymentService.uploadSlip(bookingId, file.path, user);
   }
 
-  // ── User: ดูสถานะ payment ของ booking ────────────────────────────────────
+  // ── User: ดูสถานะ payment ของ booking
   @Get('booking/:bookingId')
   getMyPayment(@Param('bookingId') bookingId: string, @GetUser() user: User) {
     return this.paymentService.getMyPayment(bookingId, user);
   }
 
-  // ── Admin: ดูรายการ payment ทั้งหมด ──────────────────────────────────────
+  // ── Admin: ดูรายการ payment ทั้งหมด
   @Get('admin/all')
-  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
   getAllPayments(@Query('status') status?: string) {
     return this.paymentService.getAllPayments(status);
   }
 
-  // ── Admin: ดู payment รายละเอียด ─────────────────────────────────────────
-  @Get('admin/:paymentId')
-  @UseGuards(RolesGuard)
+  // ── Admin: ดู payment รายละเอียด
+  @Get('admin/:id')
+  @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
-  getPaymentById(@Param('paymentId') paymentId: string) {
+  getPaymentById(@Param('id') paymentId: string) {
     return this.paymentService.getPaymentById(paymentId);
   }
 
-  // ── Admin: อนุมัติหรือปฏิเสธ ─────────────────────────────────────────────
-  @Patch('admin/:paymentId/review')
-  @UseGuards(RolesGuard)
+  // ── Admin: อนุมัติหรือปฏิเสธ
+  @Patch('admin/:id/review')
+  @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
   reviewPayment(
-    @Param('paymentId') paymentId: string,
+    @Param('id') paymentId: string,
     @Body() dto: ReviewPaymentDto,
     @GetUser() user: User,
   ) {
@@ -104,5 +103,16 @@ export class PaymentController {
       user.id,
       dto.note,
     );
+  }
+
+  @Patch('admin/:id/refund')
+  @UseGuards(AuthGuard('jwt'))
+  @Auth(Role.ADMIN)
+  confirmRefund(
+    @Param('id') paymentId: string,
+    @Body('note') note: string,
+    @GetUser() user: User,
+  ) {
+    return this.paymentService.confirmRefund(paymentId, user.id, note);
   }
 }

@@ -25,6 +25,10 @@ export class PaymentService {
       throw new NotFoundException('ไม่พบการจอง');
     }
 
+    if (booking.paymentDeadline && booking.paymentDeadline < new Date()) {
+      throw new BadRequestException('หมดเวลาชำระเงินแล้ว');
+    }
+
     if (booking.userId !== user.id) {
       throw new ForbiddenException('ไม่มีสิทธิ์เข้าถึงการจองนี้');
     }
@@ -227,14 +231,27 @@ export class PaymentService {
     return payment;
   }
 
-  // ให้ User ส่งใบเสร็จใหม่ กรณี Admin REJECT
-  // async reSubmitPayment(paymentId: string, newSlipUrl: string, user: User) {
-  //   const uploadedSlip = await this.uploadSlip(paymentId, newSlipUrl, user);
+  async confirmRefund(paymentId: string, adminId: string, note?: string) {
+    console.log('adminId', adminId);
+    console.log('note', note);
+    console.log('paymentId', paymentId);
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
 
-  //   if (!uploadedSlip) {
-  //     throw new BadRequestException('ไม่สามารถอัพโหลดใบเสร็จใหม่ได้');
-  //   }
+    if (!payment) throw new NotFoundException();
+    if (payment.status !== 'REFUND_PENDING') {
+      throw new BadRequestException('ไม่มีรายการรอคืนเงิน');
+    }
 
-  //   return
-  // }
+    return this.prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        status: 'REFUNDED',
+        refundedAt: new Date(),
+        refundedBy: adminId,
+        refundNote: note ?? payment.refundNote,
+      },
+    });
+  }
 }

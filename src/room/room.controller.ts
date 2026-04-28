@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   BadRequestException,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -66,8 +67,22 @@ export class RoomController {
     return { url: file.path }; // ✅ เปลี่ยนจาก file.filename → file.path
   }
   @Get()
-  findAll() {
-    return this.roomService.findAll();
+  getList(
+    @Query('checkIn') checkIn?: string,
+    @Query('checkOut') checkOut?: string,
+    @Query('guests') guests?: string,
+  ) {
+    return this.roomService.getList({
+      checkIn,
+      checkOut,
+      guests: Number(guests),
+    });
+  }
+
+  @Get('admin')
+  @Auth(Role.ADMIN)
+  getListAdmin() {
+    return this.roomService.getListAdmin();
   }
 
   @Get(':id')

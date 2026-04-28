@@ -2,6 +2,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { differenceInDays } from 'date-fns';
 import { customAlphabet } from 'nanoid';
 import { Decimal } from '@prisma/client/runtime/client';
 import { BookingStatus, Prisma, User } from '@/generated/client';
+import { CancelBookingDto } from './dto/cancel-booking.dto';
 
 // interface UserType {
 //   userId: string;
@@ -28,6 +30,13 @@ export class BookingService {
     '123456789ABCDEFGHJKLMNPQRSTUVWXYZ',
     6,
   );
+
+  private calculateRefund(amount: number, checkInDate: Date): number {
+    const hoursLeft = (checkInDate.getTime() - Date.now()) / 3600000;
+    if (hoursLeft >= 48) return amount;
+    if (hoursLeft >= 0) return amount * 0.5;
+    return 0;
+  }
 
   async create(createBookingDto: CreateBookingDto, user: User) {
     console.log('createBookingDto', createBookingDto);
@@ -94,6 +103,8 @@ export class BookingService {
             totalAmount,
             status: 'PENDING',
             code: bookingCode,
+            paymentDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            // paymentDeadline: new Date(Date.now() + 1 * 60 * 1000), // 1 นาที
           },
           include: {
             room: {
@@ -182,15 +193,80 @@ export class BookingService {
     });
   }
 
-  async cancelBookingByUser(id: string, user: User) {
-    return await this.prisma.booking.update({
-      where: {
-        id: id,
-        userId: user.id,
-      },
-      data: {
-        status: 'CANCELLED',
-      },
+  // async cancelBookingByUser(id: string, user: User) {
+  //   return await this.prisma.booking.update({
+  //     where: {
+  //       id: id,
+  //       userId: user.id,
+  //     },
+  //     data: {
+  //       status: 'CANCELLED',
+  //     },
+  //   });
+  // }
+  async cancelBooking(
+    bookingId: string,
+    userId: string,
+    dto: CancelBookingDto,
+  ) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { payment: true },
+    });
+
+    if (!booking) throw new NotFoundException('ไม่พบการจอง');
+    if (booking.userId !== userId) throw new ForbiddenException();
+    if (!['PENDING', 'CONFIRMED'].includes(booking.status)) {
+      throw new BadRequestException('ไม่สามารถยกเลิกได้');
+    }
+
+    const now = new Date();
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          status: 'CANCELLED',
+          cancellationReason: dto.reason,
+          cancelledAt: now,
+        },
+      });
+
+      // ไม่มี payment → จบเลย
+      if (!booking.payment) return { message: 'ยกเลิกสำเร็จ' };
+
+      const { status: paymentStatus } = booking.payment;
+
+      // WAITING_REVIEW หรือ APPROVED → ต้องคืนเงิน
+      if (['WAITING_REVIEW', 'APPROVED'].includes(paymentStatus)) {
+        const refundAmount =
+          paymentStatus === 'APPROVED'
+            ? this.calculateRefund(
+                Number(booking.payment.amount),
+                booking.checkInDate,
+              )
+            : null; // WAITING_REVIEW ยังไม่รู้ว่าโอนจริงไหม admin ตัดสินใจเอง
+
+        await tx.payment.update({
+          where: { id: booking.payment.id },
+          data: {
+            status: 'REFUND_PENDING',
+            refundAmount,
+            refundNote: dto.reason,
+            // ข้อมูลบัญชีรับเงินคืน
+            refundBankName: dto.bankName,
+            refundBankAccount: dto.bankAccount,
+            refundBankAccountName: dto.bankAccountName,
+          },
+        });
+
+        return {
+          message: 'ยกเลิกแล้ว รอ admin ดำเนินการคืนเงิน',
+          refundAmount,
+        };
+      }
+
+      return { message: 'ยกเลิกสำเร็จ' };
     });
   }
 }

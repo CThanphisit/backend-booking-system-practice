@@ -9,6 +9,8 @@ import { BookingModule } from './booking/booking.module';
 import { RoomModule } from './room/room.module';
 import { PaymentModule } from './payment/payment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     RoomModule,
     PaymentModule,
     CloudinaryModule,
+    ScheduleModule.forRoot(),
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

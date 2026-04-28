@@ -26,12 +26,52 @@ export class RoomService {
     });
   }
 
-  async findAll() {
-    const allRooms = await this.prisma.room.findMany({
-      orderBy: { createdAt: 'desc' },
+  async getList(params?: {
+    checkIn?: string;
+    checkOut?: string;
+    guests?: number;
+  }) {
+    // ถ้าไม่ได้ส่งวันที่มา → return ทั้งหมด
+    if (!params?.checkIn || !params?.checkOut) {
+      return this.prisma.room.findMany({
+        where: { status: 'AVAILABLE' },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
+    const checkInDate = new Date(params.checkIn + 'T00:00:00');
+    const checkOutDate = new Date(params.checkOut + 'T00:00:00');
+
+    // หา roomId ที่มีการจองซ้อนกับช่วงวันที่เลือก
+    const bookedRooms = await this.prisma.booking.findMany({
+      where: {
+        status: { in: ['PENDING', 'CONFIRMED', 'CHECKED_IN'] },
+        AND: [
+          { checkInDate: { lt: checkOutDate } },
+          { checkOutDate: { gt: checkInDate } },
+        ],
+      },
+      select: { roomId: true },
     });
 
-    return allRooms;
+    const bookedRoomIds = bookedRooms.map((b) => b.roomId);
+
+    return this.prisma.room.findMany({
+      where: {
+        status: 'AVAILABLE',
+        id: { notIn: bookedRoomIds }, // ไม่เอาห้องที่ถูกจอง
+        ...(params.guests && {
+          maxOccupancy: { gte: params.guests }, // รองรับจำนวนคนพอ
+        }),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  getListAdmin() {
+    return this.prisma.room.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async getBookedDates(roomId: string): Promise<string[]> {

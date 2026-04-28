@@ -788,7 +788,9 @@ export const BookingScalarFieldEnum = {
   note: 'note',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  paymentDeadline: 'paymentDeadline'
+  paymentDeadline: 'paymentDeadline',
+  cancellationReason: 'cancellationReason',
+  cancelledAt: 'cancelledAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
@@ -804,7 +806,14 @@ export const PaymentScalarFieldEnum = {
   reviewedBy: 'reviewedBy',
   reviewedAt: 'reviewedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  refundAmount: 'refundAmount',
+  refundedAt: 'refundedAt',
+  refundedBy: 'refundedBy',
+  refundBankName: 'refundBankName',
+  refundBankAccount: 'refundBankAccount',
+  refundBankAccountName: 'refundBankAccountName',
+  refundNote: 'refundNote'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
