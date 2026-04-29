@@ -51,14 +51,16 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: false, // dev
-      sameSite: 'lax',
+      secure: true, // dev
+      sameSite: 'none',
+      path: '/',
     });
 
     res.clearCookie('role', {
       httpOnly: false,
-      secure: false, // dev
-      sameSite: 'lax',
+      secure: true, // dev
+      sameSite: 'none',
+      path: '/',
     });
 
     return { message: 'Logout success' };
