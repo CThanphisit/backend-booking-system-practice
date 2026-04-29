@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Role } from 'src/generated/enums';
@@ -22,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           return req?.cookies?.access_token;
         },
       ]),
-      secretOrKey: ConfigService.get<string>('JWT_SECRET'),
+      secretOrKey: process.env.JWT_SECRET!,
     });
   }
 
