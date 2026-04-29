@@ -29,14 +29,14 @@ export class AuthController {
 
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     res.cookie('role', result.user.role, {
       httpOnly: false, // ต้องอ่านได้ใน middleware
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return {

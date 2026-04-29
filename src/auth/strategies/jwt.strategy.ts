@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           return req?.cookies?.access_token;
         },
       ]),
-      secretOrKey: 'your-secret-key',
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
