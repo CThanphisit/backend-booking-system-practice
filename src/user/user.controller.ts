@@ -34,7 +34,7 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  // ── GET ONE (Admin only) ────────────────────────────────────────────────────
+  // GET ONE (Admin only)
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
@@ -42,7 +42,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  // ── CREATE (Admin only) ─────────────────────────────────────────────────────
+  // CREATE (Admin only)
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
@@ -50,13 +50,13 @@ export class UserController {
     return this.userService.create(dto);
   }
 
-  // ── UPDATE ME (user แก้ข้อมูลตัวเอง) ──────────────────────────────────────
+  // UPDATE ME (user แก้ข้อมูลตัวเอง)
   @Patch('me')
   updateMe(@GetUser() user: User, @Body() dto: UpdateUserDto) {
     return this.userService.update(user.id, dto);
   }
 
-  // ── UPDATE (Admin only) ─────────────────────────────────────────────────────
+  // UPDATE (Admin only)
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
@@ -64,7 +64,7 @@ export class UserController {
     return this.userService.update(id, dto);
   }
 
-  // ── DELETE (Admin only) ─────────────────────────────────────────────────────
+  // DELETE (Admin only)
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   @Auth(Role.ADMIN)
