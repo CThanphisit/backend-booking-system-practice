@@ -32,14 +32,16 @@ export class AuthController {
       httpOnly: true,
       // secure: process.env.NODE_ENV === 'production',
       secure: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'lax',
     });
 
     res.cookie('role', result.user.role, {
       httpOnly: false, // ต้องอ่านได้ใน middleware
       // secure: process.env.NODE_ENV === 'production',
       secure: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'lax',
     });
 
     return {
@@ -52,15 +54,19 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // secure: process.env.NODE_ENV === 'production', // dev
+      // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: true, // dev
+      sameSite: 'lax',
       path: '/',
     });
 
     res.clearCookie('role', {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production', // dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // secure: process.env.NODE_ENV === 'production', // dev
+      // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: true, // dev
+      sameSite: 'lax',
       path: '/',
     });
 
