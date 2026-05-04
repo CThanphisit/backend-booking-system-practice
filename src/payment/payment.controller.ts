@@ -47,9 +47,9 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('upload-slip')
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   // ── User: upload slip
-  @Post('upload-slip')
+  // @Post('upload-slip')
   @UseInterceptors(
     FileInterceptor('slip', {
       storage: slipStorage,
