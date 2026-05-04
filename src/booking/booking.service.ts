@@ -39,7 +39,6 @@ export class BookingService {
   }
 
   async create(createBookingDto: CreateBookingDto, user: User) {
-    console.log('createBookingDto', createBookingDto);
     //เช็คห้องว่าว่างมั้ย
     return await this.prisma.$transaction(
       async (tx) => {
@@ -163,7 +162,6 @@ export class BookingService {
   }
 
   async findOne(id: string, userId: string) {
-    console.log('userIdGetBookingByID', userId);
     const checkOwner = await this.prisma.booking.findFirst({
       where: {
         id: id,

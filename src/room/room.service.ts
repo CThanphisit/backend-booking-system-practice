@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 export class RoomService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createRoomDto: CreateRoomDto) {
-    console.log('createRoomDto', createRoomDto);
     const existingRoom = await this.prisma.room.findUnique({
       where: { roomNumber: createRoomDto.roomNumber },
     });

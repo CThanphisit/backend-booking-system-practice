@@ -28,7 +28,6 @@ export class UserService {
   ) {}
 
   async register(resgisterDto: RegisterDto) {
-    console.log('resgisterDto', resgisterDto);
     const { email, password, first_name, last_name, phoneNumber } =
       resgisterDto;
 

@@ -24,8 +24,6 @@ export class AuthController {
     @Body() body: { email: string; password: string },
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('bodyLogin', body);
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
     const result = await this.authService.login(body.email, body.password);
 
     res.cookie('access_token', result.access_token, {

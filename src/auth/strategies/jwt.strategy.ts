@@ -12,7 +12,6 @@ export interface JwtPayload {
   last_name: string;
   phoneNumber: string;
 }
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

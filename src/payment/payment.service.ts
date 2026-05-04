@@ -232,9 +232,6 @@ export class PaymentService {
   }
 
   async confirmRefund(paymentId: string, adminId: string, note?: string) {
-    console.log('adminId', adminId);
-    console.log('note', note);
-    console.log('paymentId', paymentId);
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
     });

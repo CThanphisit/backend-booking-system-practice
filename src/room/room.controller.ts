@@ -49,8 +49,8 @@ export class RoomController {
   }
 
   @Post('upload-image')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @Roles(Role.ADMIN)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: cloudinaryStorage, // ✅ เปลี่ยนจาก diskStorage
