@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ReviewAction } from './dto/review-payment.dto';
 import { User } from '@/generated/client';
+import { PaymentStatus } from '@/generated/enums';
 
 @Injectable()
 export class PaymentService {
@@ -105,7 +106,7 @@ export class PaymentService {
 
   // ─── Admin: ดูรายการ payment ทั้งหมด + filter ─────────────────────────
   async getAllPayments(status?: string) {
-    const whereCondition = status ? { status: status as any } : {};
+    const whereCondition = status ? { status: status as PaymentStatus } : {};
 
     return this.prisma.payment.findMany({
       where: whereCondition,

@@ -131,18 +131,16 @@ export class UserService {
       if (existing) throw new ConflictException('อีเมลนี้ถูกใช้งานแล้ว');
     }
 
-    const data: any = {
+    const data = {
       email: dto.email,
       first_name: dto.first_name,
       last_name: dto.last_name,
       phoneNumber: dto.phoneNumber,
       role: dto.role,
+      ...(dto.password
+        ? { password: await bcrypt.hash(dto.password, 10) }
+        : {}),
     };
-
-    // hash password ใหม่เฉพาะถ้าส่งมา
-    if (dto.password) {
-      data.password = await bcrypt.hash(dto.password, 10);
-    }
 
     return this.prisma.user.update({
       where: { id },

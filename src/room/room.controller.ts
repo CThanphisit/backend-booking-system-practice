@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
   UseInterceptors,
   BadRequestException,
   UploadedFile,
@@ -17,9 +16,6 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Role } from 'src/generated/enums';
 import { Auth } from 'src/common/decorators/auth.decorator';
-import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '@/auth/guards/roles.guard';
-import { Roles } from '@/common/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -35,7 +31,7 @@ const cloudinaryStorage = new CloudinaryStorage({
   params: {
     folder: 'bookify/rooms',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-  } as any,
+  } as object,
 });
 
 @Controller('room')

@@ -28,11 +28,11 @@ const slipStorage = new CloudinaryStorage({
     folder: 'bookify/slips',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [{ quality: 'auto', fetch_format: 'auto' }],
-  } as any,
+  } as object,
 });
 
 const imageFileFilter = (
-  req: any,
+  _req: unknown,
   file: Express.Multer.File,
   cb: (error: Error | null, acceptFile: boolean) => void,
 ) => {
