@@ -14,6 +14,7 @@ import { Role } from '@/generated/enums';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { GetUser } from '@/common/decorators/get-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import type { User } from '@/generated/client';
 
@@ -52,7 +53,7 @@ export class UserController {
 
   // UPDATE ME (user แก้ข้อมูลตัวเอง)
   @Patch('me')
-  updateMe(@GetUser() user: User, @Body() dto: UpdateUserDto) {
+  updateMe(@GetUser() user: User, @Body() dto: UpdateProfileDto) {
     return this.userService.update(user.id, dto);
   }
 

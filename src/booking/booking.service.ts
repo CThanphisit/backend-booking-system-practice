@@ -7,11 +7,26 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, format as formatDate } from 'date-fns';
 import { customAlphabet } from 'nanoid';
 import { Decimal } from '@prisma/client/runtime/client';
 import { BookingStatus, Prisma, User } from '@/generated/client';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
+import { ExportBookingQueryDto } from './dto/export_booking_query.dto';
+
+// shape ของแต่ละแถวใน CSV — ชื่อ key = header ในไฟล์
+export type BookingCsvRow = {
+  'Booking Code': string;
+  'Guest Name': string;
+  Room: string;
+  'Room Type': string;
+  'Check-in': string;
+  'Check-out': string;
+  Nights: number;
+  'Total Amount (THB)': string;
+  'Booking Status': string;
+  'Payment Status': string;
+};
 
 // interface UserType {
 //   userId: string;
@@ -129,7 +144,7 @@ export class BookingService {
     );
   }
 
-  async findAll(user: User) {
+  async findAll(user: User, limit?: number) {
     let whereCondition = {};
 
     // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะ Booking ที่ตัวเองเป็นเจ้าของ
@@ -158,6 +173,7 @@ export class BookingService {
       orderBy: {
         updatedAt: 'desc',
       },
+      take: limit,
     });
   }
 
@@ -202,6 +218,66 @@ export class BookingService {
   //     },
   //   });
   // }
+  /**
+   * ดึงข้อมูล booking ตาม filter แล้ว map เป็น array ของ BookingCsvRow
+   * เพื่อส่งให้ controller เอาไป stream เป็น CSV
+   *
+   * Logic การ filter:
+   *  - startDate / endDate  → กรอง checkInDate อยู่ในช่วงที่กำหนด
+   *  - bookingStatus        → กรองสถานะ booking โดยตรง
+   *  - paymentStatus        → กรองผ่าน relation payment.status
+   *                           (booking ที่ไม่มี payment record จะหายออกไปถ้าใส่ filter นี้)
+   *
+   * ผลลัพธ์เรียงตาม checkInDate จากเก่าสุดไปใหม่สุด
+   */
+  async getBookingsForExport(
+    filters: ExportBookingQueryDto,
+  ): Promise<BookingCsvRow[]> {
+    // สร้าง where clause ทีละส่วนตาม filter ที่ส่งมา
+    const where: Prisma.BookingWhereInput = {};
+
+    if (filters.startDate || filters.endDate) {
+      where.checkInDate = {
+        ...(filters.startDate && { gte: filters.startDate }),
+        ...(filters.endDate && { lte: filters.endDate }),
+      };
+    }
+
+    if (filters.bookingStatus) {
+      where.status = filters.bookingStatus;
+    }
+
+    if (filters.paymentStatus) {
+      // กรองผ่าน nested relation — Prisma จะ inner join ให้อัตโนมัติ
+      where.payment = { status: filters.paymentStatus };
+    }
+
+    const bookings = await this.prisma.booking.findMany({
+      where,
+      include: {
+        user: { select: { first_name: true, last_name: true } },
+        room: { select: { roomNumber: true, type: true } },
+        payment: { select: { status: true } },
+      },
+      orderBy: { checkInDate: 'asc' },
+    });
+
+    // map Prisma result → flat object ที่ key ตรงกับ CSV header
+    return bookings.map((booking) => ({
+      'Booking Code': booking.code,
+      'Guest Name': `${booking.user.first_name} ${booking.user.last_name}`,
+      Room: booking.room.roomNumber,
+      'Room Type': booking.room.type,
+      'Check-in': formatDate(booking.checkInDate, 'yyyy-MM-dd'),
+      'Check-out': formatDate(booking.checkOutDate, 'yyyy-MM-dd'),
+      Nights: booking.nights,
+      'Total Amount (THB)': Number(booking.totalAmount).toFixed(2),
+      'Booking Status': booking.status,
+      // booking ที่ยังไม่มี payment record แสดงเป็น "-"
+      'Payment Status': booking.payment?.status ?? '-',
+    }));
+  }
+
   async cancelBooking(
     bookingId: string,
     userId: string,

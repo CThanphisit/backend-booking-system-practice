@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  Matches,
   MinLength,
 } from 'class-validator';
 import { Role } from 'src/generated/enums';
@@ -32,5 +33,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @MinLength(8, { message: 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/, {
+    message:
+      'รหัสผ่านต้องมีตัวพิมพ์เล็ก ตัวพิมพ์ใหญ่ ตัวเลข และอักขระพิเศษ (!@#$%^&*) อย่างน้อยอย่างละ 1 ตัว',
+  })
   password?: string;
 }

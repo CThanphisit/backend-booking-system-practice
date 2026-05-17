@@ -11,6 +11,7 @@ import { PaymentModule } from './payment/payment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JobsModule } from './jobs/jobs.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { JobsModule } from './jobs/jobs.module';
     CloudinaryModule,
     ScheduleModule.forRoot(),
     JobsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
